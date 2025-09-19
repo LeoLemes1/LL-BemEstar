@@ -3,13 +3,10 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/logo.png";
-
-const imagens = {
-  hero: "https://picsum.photos/1600/900?random=1",
-  proteina: "https://picsum.photos/500/400?random=2",
-  gordura: "https://picsum.photos/500/400?random=3",
-  carbo: "https://picsum.photos/500/400?random=4",
-};
+import almoco from "../assets/almoco.jpg"
+import cafe from "../assets/cafe.jpg"
+import fundo from "../assets/fundo.jpg"
+import verdura from "../assets/verdura.jpg"
 
 export default function InicioPagina() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,13 +30,7 @@ export default function InicioPagina() {
             to="/LoginRegistro"
             className="text-white font-semibold hover:underline  font-poeta"
           >
-            Entrar
-          </Link>
-          <Link
-            to="/registro"
-            className="text-white font-semibold hover:underline  font-poeta"
-          >
-            Registrar
+            Entrar | Registrar
           </Link>
         </div>
 
@@ -104,9 +95,9 @@ export default function InicioPagina() {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col">
-        <div className="relative w-full h-[450px] md:h-[550px]">
+        <div className="relative w-full h-[450px] md:h-[645px]">
           <img
-            src={imagens.hero}
+            src={fundo}
             alt="Hero"
             className="w-full h-full object-cover"
           />
@@ -128,68 +119,7 @@ export default function InicioPagina() {
           </div>
         </div>
 
-        <section className="grid md:grid-cols-3 gap-8 mt-16 max-w-6xl mx-auto w-full px-6">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-white shadow-lg rounded-2xl overflow-hidden"
-          >
-            <img
-              src={imagens.proteina}
-              alt="Proteína"
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold text-green-700 mb-2">
-                Proteína
-              </h3>
-              <p className="text-gray-800 text-sm">
-                1.6–2.2g/kg de peso corporal.
-                <br />
-                Essencial para manutenção muscular e saciedade (OMS).
-              </p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-white shadow-lg rounded-2xl overflow-hidden"
-          >
-            <img
-              src={imagens.gordura}
-              alt="Gordura"
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold text-green-700 mb-2">Gordura</h3>
-              <p className="text-gray-800 text-sm">
-                20%–30% das calorias.
-                <br />
-                Fonte de energia, hormônios e vitaminas lipossolúveis.
-              </p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-white shadow-lg rounded-2xl overflow-hidden"
-          >
-            <img
-              src={imagens.carbo}
-              alt="Carboidratos"
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold text-green-700 mb-2">
-                Carboidratos
-              </h3>
-              <p className="text-gray-800 text-sm">
-                Principal combustível.
-                <br />
-                Recomendado 45%–55% das calorias totais (Harvard Health).
-              </p>
-            </div>
-          </motion.div>
-        </section>
+        
 
         <section className="max-w-6xl mx-auto px-6 mt-20 text-center">
           <h3 className="text-3xl font-bold text-green-800">Como funciona?</h3>
@@ -242,7 +172,68 @@ export default function InicioPagina() {
             <li>⚡ Aumenta energia e disposição diária.</li>
           </ul>
         </section>
+<section className="grid md:grid-cols-3 gap-8 mt-16 max-w-6xl mx-auto w-full px-6">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="bg-white shadow-lg rounded-2xl overflow-hidden"
+          >
+            <img
+              src={cafe}
+              alt="Proteína"
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold text-green-700 mb-2">
+                Proteína
+              </h3>
+              <p className="text-gray-800 text-sm">
+                1.6–2.2g/kg de peso corporal.
+                <br />
+                Essencial para manutenção muscular e saciedade (OMS).
+              </p>
+            </div>
+          </motion.div>
 
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="bg-white shadow-lg rounded-2xl overflow-hidden"
+          >
+            <img
+              src={verdura}
+              alt="Gordura"
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold text-green-700 mb-2">Gordura</h3>
+              <p className="text-gray-800 text-sm">
+                20%–30% das calorias.
+                <br />
+                Fonte de energia, hormônios e vitaminas lipossolúveis.
+              </p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="bg-white shadow-lg rounded-2xl overflow-hidden"
+          >
+            <img
+              src={almoco}
+              alt="Carboidratos"
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold text-green-700 mb-2">
+                Carboidratos
+              </h3>
+              <p className="text-gray-800 text-sm">
+                Principal combustível.
+                <br />
+                Recomendado 45%–55% das calorias totais (Harvard Health).
+              </p>
+            </div>
+          </motion.div>
+        </section>
         <section className="max-w-6xl mx-auto px-6 mt-20 mb-16 text-center">
           <h3 className="text-3xl font-bold text-green-800">Próximos passos</h3>
           <p className="text-gray-700 mt-4 max-w-3xl mx-auto">
@@ -250,7 +241,7 @@ export default function InicioPagina() {
             receba relatórios semanais e acompanhe sua evolução.
           </p>
           <Link
-            to="/registro"
+            to="/LoginRegistro"
             className="mt-6 inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full text-lg shadow-lg"
           >
             Criar conta gratuita
