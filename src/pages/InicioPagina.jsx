@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/logo.png";
-import almoco from "../assets/almoco.jpg"
-import cafe from "../assets/cafe.jpg"
-import fundo from "../assets/fundo.jpg"
-import verdura from "../assets/verdura.jpg"
+import almoco from "../assets/almoco.jpg";
+import cafe from "../assets/cafe.jpg";
+import fundo from "../assets/fundo.jpg";
+import verdura from "../assets/verdura.jpg";
 
 export default function InicioPagina() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,6 +26,24 @@ export default function InicioPagina() {
             <option>PT</option>
             <option>EN</option>
           </select>
+          <Link
+            to="/about"
+            className="text-white font-semibold hover:underline  font-poeta"
+          >
+            Sobre
+          </Link>
+          <Link
+            to="/help"
+            className="text-white font-semibold hover:underline  font-poeta"
+          >
+            Ajuda
+          </Link>
+          <Link
+            to="/calculadora"
+            className="text-white font-semibold hover:underline  font-poeta"
+          >
+            Calculadora
+          </Link>
           <Link
             to="/LoginRegistro"
             className="text-white font-semibold hover:underline  font-poeta"
@@ -56,20 +74,38 @@ export default function InicioPagina() {
               onDragEnd={(e, info) => {
                 if (info.offset.y < -50) setMenuOpen(false);
               }}
-              className="fixed top-0 left-0 w-full h-[30%] bg-white shadow-xl z-30 flex flex-col items-center justify-center gap-6 rounded-b-2xl"
+              className="fixed top-0 left-0 w-full h-[60%] bg-white shadow-xl z-30 flex flex-col items-center justify-start pt-12 gap-4 rounded-b-2xl overflow-y-auto"
             >
               <select className="rounded-md px-2 py-1 bg-gray-100 text-green-900">
                 <option>PT</option>
                 <option>EN</option>
               </select>
               <Link
-                to="/login"
+                to="/about"
+                className="text-green-800 text-lg font-semibold"
+              >
+                Sobre
+              </Link>
+              <Link
+                to="/help"
+                className="text-green-800 text-lg font-semibold"
+              >
+                Ajuda
+              </Link>
+              <Link
+                to="/calculadora"
+                className="text-green-800 text-lg font-semibold"
+              >
+                Calculadora
+              </Link>
+              <Link
+                to="/LoginRegistro"
                 className="text-green-800 text-lg font-semibold"
               >
                 Entrar
               </Link>
               <Link
-                to="/registro"
+                to="/LoginRegistro"
                 className="text-green-800 text-lg font-semibold"
               >
                 Registrar
@@ -95,12 +131,8 @@ export default function InicioPagina() {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col">
-        <div className="relative w-full h-[450px] md:h-[645px]">
-          <img
-            src={fundo}
-            alt="Hero"
-            className="w-full h-full object-cover"
-          />
+        <div className="relative w-full h-[450px] md:h-[833px]">
+          <img src={fundo} alt="Hero" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent flex flex-col items-center justify-center text-center px-4">
             <h2 className="text-4xl md:text-6xl font-bold text-white drop-shadow-lg max-w-3xl font-poeta">
               Descubra sua nutrição ideal
@@ -118,8 +150,6 @@ export default function InicioPagina() {
             </Link>
           </div>
         </div>
-
-        
 
         <section className="max-w-6xl mx-auto px-6 mt-20 text-center">
           <h3 className="text-3xl font-bold text-green-800">Como funciona?</h3>
@@ -172,7 +202,7 @@ export default function InicioPagina() {
             <li>⚡ Aumenta energia e disposição diária.</li>
           </ul>
         </section>
-<section className="grid md:grid-cols-3 gap-8 mt-16 max-w-6xl mx-auto w-full px-6">
+        <section className="grid md:grid-cols-3 gap-8 mt-16 max-w-6xl mx-auto w-full px-6">
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="bg-white shadow-lg rounded-2xl overflow-hidden"
@@ -241,7 +271,7 @@ export default function InicioPagina() {
             receba relatórios semanais e acompanhe sua evolução.
           </p>
           <Link
-            to="/LoginRegistro"
+            to="/LoginRegistro  "
             className="mt-6 inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full text-lg shadow-lg"
           >
             Criar conta gratuita

@@ -1,0 +1,222 @@
+export const foodDatabase = [
+  {
+    id: 1,
+    name: 'Arroz Branco',
+    nameEn: 'White Rice',
+    caloriesPer100g: 130,
+    protein: 2.7,
+    carbs: 28,
+    fat: 0.3,
+    fiber: 0.4,
+    category: 'grains'
+  },
+  {
+    id: 2,
+    name: 'Arroz Integral',
+    nameEn: 'Brown Rice',
+    caloriesPer100g: 111,
+    protein: 2.6,
+    carbs: 23,
+    fat: 0.9,
+    fiber: 1.8,
+    category: 'grains'
+  },
+  {
+    id: 3,
+    name: 'Frango Grelhado',
+    nameEn: 'Grilled Chicken',
+    caloriesPer100g: 165,
+    protein: 31,
+    carbs: 0,
+    fat: 3.6,
+    fiber: 0,
+    category: 'protein'
+  },
+  {
+    id: 4,
+    name: 'Salmão',
+    nameEn: 'Salmon',
+    caloriesPer100g: 208,
+    protein: 25,
+    carbs: 0,
+    fat: 12,
+    fiber: 0,
+    category: 'protein'
+  },
+  {
+    id: 5,
+    name: 'Ovos',
+    nameEn: 'Eggs',
+    caloriesPer100g: 155,
+    protein: 13,
+    carbs: 1.1,
+    fat: 11,
+    fiber: 0,
+    category: 'protein'
+  },
+  {
+    id: 6,
+    name: 'Banana',
+    nameEn: 'Banana',
+    caloriesPer100g: 89,
+    protein: 1.1,
+    carbs: 23,
+    fat: 0.3,
+    fiber: 2.6,
+    category: 'fruits'
+  },
+  {
+    id: 7,
+    name: 'Maçã',
+    nameEn: 'Apple',
+    caloriesPer100g: 52,
+    protein: 0.3,
+    carbs: 14,
+    fat: 0.2,
+    fiber: 2.4,
+    category: 'fruits'
+  },
+  {
+    id: 8,
+    name: 'Brócolis',
+    nameEn: 'Broccoli',
+    caloriesPer100g: 34,
+    protein: 2.8,
+    carbs: 7,
+    fat: 0.4,
+    fiber: 2.6,
+    category: 'vegetables'
+  },
+  {
+    id: 9,
+    name: 'Espinafre',
+    nameEn: 'Spinach',
+    caloriesPer100g: 23,
+    protein: 2.9,
+    carbs: 3.6,
+    fat: 0.4,
+    fiber: 2.2,
+    category: 'vegetables'
+  },
+  {
+    id: 10,
+    name: 'Batata Doce',
+    nameEn: 'Sweet Potato',
+    caloriesPer100g: 86,
+    protein: 1.6,
+    carbs: 20,
+    fat: 0.1,
+    fiber: 3,
+    category: 'vegetables'
+  },
+  {
+    id: 11,
+    name: 'Aveia',
+    nameEn: 'Oats',
+    caloriesPer100g: 389,
+    protein: 17,
+    carbs: 66,
+    fat: 7,
+    fiber: 11,
+    category: 'grains'
+  },
+  {
+    id: 12,
+    name: 'Amêndoas',
+    nameEn: 'Almonds',
+    caloriesPer100g: 579,
+    protein: 21,
+    carbs: 22,
+    fat: 50,
+    fiber: 12,
+    category: 'nuts'
+  },
+  {
+    id: 13,
+    name: 'Iogurte Grego',
+    nameEn: 'Greek Yogurt',
+    caloriesPer100g: 59,
+    protein: 10,
+    carbs: 3.6,
+    fat: 0.4,
+    fiber: 0,
+    category: 'dairy'
+  },
+  {
+    id: 14,
+    name: 'Queijo Cottage',
+    nameEn: 'Cottage Cheese',
+    caloriesPer100g: 98,
+    protein: 11,
+    carbs: 3.4,
+    fat: 4.3,
+    fiber: 0,
+    category: 'dairy'
+  },
+  {
+    id: 15,
+    name: 'Azeite de Oliva',
+    nameEn: 'Olive Oil',
+    caloriesPer100g: 884,
+    protein: 0,
+    carbs: 0,
+    fat: 100,
+    fiber: 0,
+    category: 'fats'
+  },
+  {
+    id: 16,
+    name: 'Abacate',
+    nameEn: 'Avocado',
+    caloriesPer100g: 160,
+    protein: 2,
+    carbs: 9,
+    fat: 15,
+    fiber: 7,
+    category: 'fruits'
+  },
+  {
+    id: 17,
+    name: 'Quinoa',
+    nameEn: 'Quinoa',
+    caloriesPer100g: 368,
+    protein: 14,
+    carbs: 64,
+    fat: 6,
+    fiber: 7,
+    category: 'grains'
+  },
+  {
+    id: 18,
+    name: 'Leite Desnatado',
+    nameEn: 'Skim Milk',
+    caloriesPer100g: 34,
+    protein: 3.4,
+    carbs: 5,
+    fat: 0.2,
+    fiber: 0,
+    category: 'dairy'
+  },
+  {
+    id: 19,
+    name: 'Castanhas',
+    nameEn: 'Brazil Nuts',
+    caloriesPer100g: 659,
+    protein: 14,
+    carbs: 12,
+    fat: 67,
+    fiber: 7.5,
+    category: 'nuts'
+  },
+  {
+    id: 20,
+    name: 'Tomate',
+    nameEn: 'Tomato',
+    caloriesPer100g: 18,
+    protein: 0.9,
+    carbs: 3.9,
+    fat: 0.2,
+    fiber: 1.2,
+    category: 'vegetables'
+  }
+];
