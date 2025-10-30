@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 import { motion } from 'framer-motion';
 import { FaCalculator, FaWeight, FaRuler, FaBirthdayCake, FaHeart, FaArrowLeft } from 'react-icons/fa';
 import { useToast } from '../context/ToastContext';
@@ -65,15 +66,7 @@ export default function Calculadora() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <div className="mb-6">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
-            >
-              <FaArrowLeft />
-              Voltar
-            </button>
-          </div>
+          <BackToDashboard />
           
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-3">

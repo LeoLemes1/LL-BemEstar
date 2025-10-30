@@ -14,6 +14,7 @@ import {
 import { mockProgress } from '../mock/userMock';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 export default function Progress() {
   const toast = useToast();
   const [selectedPeriod, setSelectedPeriod] = useState('3months');
@@ -178,13 +179,7 @@ export default function Progress() {
                 Acompanhe sua evolução e conquistas
               </p>
             </div>
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 text-emerald-600 hover:text-emerald-800 transition-colors"
-            >
-              <FaArrowLeft className="mr-2" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboard />
           </div>
         </div>
 

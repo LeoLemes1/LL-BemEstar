@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 import { motion } from 'framer-motion';
 import { 
   FaQuestionCircle, 
@@ -195,15 +196,7 @@ export default function Help() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
-          >
-            <FaArrowLeft />
-            Voltar
-          </button>
-        </div>
+        <BackToDashboard />
         
         {/* Header */}
         <div className="mb-8">

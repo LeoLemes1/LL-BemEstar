@@ -5,6 +5,7 @@ import { generateNutritionPlan } from '../services/geminiService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 
 export default function AiChat() {
   const { user } = useAuth();
@@ -98,13 +99,7 @@ export default function AiChat() {
                 Receba um plano nutricional personalizado com IA
               </p>
             </div>
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-colors"
-            >
-              <FaArrowLeft className="mr-2" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboard />
           </div>
         </div>
 

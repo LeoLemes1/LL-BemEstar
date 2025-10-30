@@ -17,6 +17,8 @@ import { mockNutritionPlan } from '../mock/userMock';
 // Chart removed to avoid hook conflicts
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
+import { MacrosDonutChart } from '../components/BeautifulCharts';
 
 export default function MyPlan() {
   const toast = useToast();
@@ -59,13 +61,7 @@ export default function MyPlan() {
                 Seu plano nutricional personalizado
               </p>
             </div>
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 text-green-600 hover:text-green-800 transition-colors"
-            >
-              <FaArrowLeft className="mr-2" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboard />
           </div>
         </div>
 
@@ -132,13 +128,11 @@ export default function MyPlan() {
               Macronutrientes
             </h3>
             <div className="h-64 flex items-center justify-center">
-              <div className="h-64 flex items-center justify-center bg-gray-100 rounded-lg">
-                <div className="text-center text-gray-500">
-                  <FaChartPie className="text-4xl mx-auto mb-2" />
-                  <p>Gráfico de Macronutrientes</p>
-                  <p className="text-sm">Em breve...</p>
-                </div>
-              </div>
+              <MacrosDonutChart
+                protein={nutritionPlan.macros.protein}
+                carbs={nutritionPlan.macros.carbs}
+                fat={nutritionPlan.macros.fat}
+              />
             </div>
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between">

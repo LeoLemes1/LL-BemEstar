@@ -10,7 +10,6 @@ import {
   FaShieldAlt, 
   FaTrash,
   FaDownload,
-  FaUpload,
   FaSave,
   FaCheck,
   FaTimes,
@@ -20,12 +19,12 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import BackToDashboard from '../components/BackToDashboard';
 
 export default function Settings() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const [settings, setSettings] = useState({
-    theme: 'light',
     notifications: {
       email: true,
       push: true,
@@ -39,15 +38,9 @@ export default function Settings() {
     },
     data: {
       autoBackup: true,
-      exportFormat: 'json'
+      exportFormat: 'pdf'
     }
   });
-
-  const themes = [
-    { value: 'light', label: 'Claro', icon: FaSun },
-    { value: 'dark', label: 'Escuro', icon: FaMoon },
-    { value: 'auto', label: 'Automático', icon: FaCog }
-  ];
 
   const handleSettingChange = (category, key, value) => {
     setSettings(prev => ({
@@ -71,7 +64,6 @@ export default function Settings() {
 
   const handleResetSettings = () => {
     const defaultSettings = {
-      theme: 'light',
       notifications: {
         email: true,
         push: true,
@@ -85,7 +77,7 @@ export default function Settings() {
       },
       data: {
         autoBackup: true,
-        exportFormat: 'json'
+        exportFormat: 'pdf'
       }
     };
     
@@ -93,67 +85,81 @@ export default function Settings() {
     toast.info('Configurações resetadas');
   };
 
-  const handleExportData = () => {
-    const userData = {
-      user: user,
-      settings: settings,
-      timestamp: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(userData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `proex-data-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
-    toast.success('Dados exportados com sucesso!');
-  };
-
-  const handleImportData = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (data.settings) {
-          setSettings(data.settings);
-          toast.success('Dados importados com sucesso!');
-        } else {
-          toast.error('Arquivo inválido');
-        }
-      } catch (error) {
-        toast.error('Erro ao importar dados');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleDeleteData = () => {
-    if (window.confirm('Tem certeza que deseja deletar todos os dados? Esta ação não pode ser desfeita.')) {
-      localStorage.clear();
-      toast.success('Todos os dados foram removidos');
-      window.location.reload();
+  const handleExportPdf = () => {
+    const win = window.open('', '_blank');
+    if (!win) {
+      toast.error('Pop-up bloqueado. Autorize pop-ups para baixar o PDF.');
+      return;
     }
+    const report = {
+      usuario: user?.name || 'Usuário',
+      email: user?.email || '-',
+      tema: 'Padrão',
+      notificacoes: settings.notifications,
+      privacidade: settings.privacy,
+      geradoEm: new Date().toLocaleString()
+    };
+    const styles = `
+      <style>
+        body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial; padding: 24px; }
+        h1 { margin: 0 0 16px; font-size: 24px; color: #064e3b; }
+        h2 { margin: 24px 0 8px; font-size: 16px; color: #111827; }
+        .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .muted { color: #6b7280; font-size: 12px; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+        @page { size: A4; margin: 16mm; }
+      </style>
+    `;
+    const html = `
+      <!doctype html><html><head><meta charset="utf-8"/>${styles}</head>
+      <body>
+        <h1>Relatório de Configurações - ProEx</h1>
+        <div class="muted">${report.geradoEm}</div>
+        <div class="card"><h2>Usuário</h2>
+          <div class="grid">
+            <div><strong>Nome:</strong> ${report.usuario}</div>
+            <div><strong>Email:</strong> ${report.email}</div>
+            <div><strong>Tema:</strong> ${report.tema}</div>
+          </div>
+        </div>
+        <div class="card"><h2>Notificações</h2>
+          <div class="grid">
+            ${Object.entries(report.notificacoes).map(([k,v])=>`<div><strong>${k}:</strong> ${v?'Ativado':'Desativado'}</div>`).join('')}
+          </div>
+        </div>
+        <div class="card"><h2>Privacidade</h2>
+          <div class="grid">
+            ${Object.entries(report.privacidade).map(([k,v])=>`<div><strong>${k}:</strong> ${v?'Sim':'Não'}</div>`).join('')}
+          </div>
+        </div>
+        <script>window.onload = () => { window.print(); setTimeout(()=>window.close(), 500); };</script>
+      </body></html>
+    `;
+    win.document.write(html);
+    win.document.close();
+    toast.success("Abra o diálogo e escolha 'Salvar como PDF'.");
+  };
+
+  const handleDeleteAccount = () => {
+    const step1 = window.confirm('Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.');
+    if (!step1) return;
+    const challenge = window.prompt('Digite seu email para confirmar:');
+    if (!challenge) return toast.info('Ação cancelada.');
+    if (challenge.trim().toLowerCase() !== (user?.email || '').toLowerCase()) {
+      toast.error('Email não confere. Conta não deletada.');
+      return;
+    }
+    // Backend virá depois. Por enquanto, limpamos sessão local e redirecionamos.
+    logout();
+    localStorage.removeItem('appSettings');
+    toast.success('Conta deletada com sucesso.');
+    window.location.href = '/loginRegistro';
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-semibold transition-colors"
-          >
-            <FaArrowLeft />
-            Voltar
-          </button>
-        </div>
+        <BackToDashboard />
         
         {/* Header */}
         <div className="mb-8">
@@ -167,37 +173,7 @@ export default function Settings() {
         </div>
 
         <div className="space-y-8">
-          {/* Theme Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg p-6"
-          >
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <FaMoon className="mr-2 text-purple-500" />
-              Tema
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {themes.map((theme) => {
-                const Icon = theme.icon;
-                return (
-                  <label key={theme.value} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="theme"
-                      value={theme.value}
-                      checked={settings.theme === theme.value}
-                      onChange={(e) => handleSettingChange('theme', 'theme', e.target.value)}
-                      className="mr-3"
-                    />
-                    <Icon className="mr-3 text-gray-600" />
-                    <span className="font-medium">{theme.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </motion.div>
+          
 
           {/* Notification Settings */}
           <motion.div
@@ -304,22 +280,6 @@ export default function Settings() {
                   {settings.data.autoBackup ? <FaToggleOn className="text-xl" /> : <FaToggleOff className="text-xl" />}
                 </button>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-medium text-gray-800">Formato de Exportação</span>
-                  <p className="text-sm text-gray-600">Formato dos dados exportados</p>
-                </div>
-                <select
-                  value={settings.data.exportFormat}
-                  onChange={(e) => handleSettingChange('data', 'exportFormat', e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="json">JSON</option>
-                  <option value="csv">CSV</option>
-                  <option value="pdf">PDF</option>
-                </select>
-              </div>
             </div>
           </motion.div>
 
@@ -335,48 +295,21 @@ export default function Settings() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <button
-                onClick={handleSaveSettings}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg flex items-center justify-center transition-colors"
-              >
-                <FaSave className="mr-2" />
-                Salvar
-              </button>
-              
-              <button
-                onClick={handleExportData}
+                onClick={handleExportPdf}
                 className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg flex items-center justify-center transition-colors"
               >
                 <FaDownload className="mr-2" />
-                Exportar
-              </button>
-              
-              <label className="bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg flex items-center justify-center transition-colors cursor-pointer">
-                <FaUpload className="mr-2" />
-                Importar
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportData}
-                  className="hidden"
-                />
-              </label>
-              
-              <button
-                onClick={handleResetSettings}
-                className="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg flex items-center justify-center transition-colors"
-              >
-                <FaCog className="mr-2" />
-                Resetar
+                Baixar PDF
               </button>
             </div>
             
             <div className="mt-6 pt-6 border-t border-gray-200">
               <button
-                onClick={handleDeleteData}
+                onClick={handleDeleteAccount}
                 className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg flex items-center justify-center transition-colors w-full"
               >
                 <FaTrash className="mr-2" />
-                Deletar Todos os Dados
+                Deletar Conta
               </button>
             </div>
           </motion.div>

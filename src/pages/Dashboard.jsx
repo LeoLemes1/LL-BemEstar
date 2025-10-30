@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import { mockUser, mockNutritionPlan, mockProgress } from '../mock/userMock';
 import { useAuth } from '../context/AuthContext';
+import { WeightProgressChart } from '../components/BeautifulCharts';
 import { useToast } from '../context/ToastContext';
 // Charts removed to avoid hook conflicts
 
@@ -31,7 +32,11 @@ export default function Dashboard() {
     window.location.href = '/loginRegistro';
   };
 
-  // Chart data removed to avoid hook conflicts
+  // Chart data (fictício)
+  const weightChartData = progress.weightHistory.map((point) => ({
+    label: point.date.slice(5),
+    value: point.weight
+  }));
 
   const quickActions = [
     {
@@ -190,13 +195,7 @@ export default function Dashboard() {
               <h3 className="text-xl font-bold text-gray-800 mb-4">
                 Evolução do Peso
               </h3>
-              <div className="h-64 flex items-center justify-center bg-gray-100 rounded-lg">
-                <div className="text-center text-gray-500">
-                  <FaChartLine className="text-4xl mx-auto mb-2" />
-                  <p>Gráfico de Progresso</p>
-                  <p className="text-sm">Em breve...</p>
-                </div>
-              </div>
+              <WeightProgressChart data={weightChartData} />
             </motion.div>
           </div>
 

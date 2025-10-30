@@ -17,6 +17,7 @@ import { generateWorkoutAdvice } from '../services/geminiService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 
 export default function Workout() {
   const { user } = useAuth();
@@ -143,13 +144,7 @@ export default function Workout() {
                 Treinos personalizados para fazer em casa
               </p>
             </div>
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <FaArrowLeft className="mr-2" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboard />
           </div>
         </div>
 

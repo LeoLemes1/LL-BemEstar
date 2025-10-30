@@ -16,6 +16,7 @@ import {
 import { foodDatabase } from '../mock/foodMock';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 
 export default function FoodCalories() {
   const toast = useToast();
@@ -123,13 +124,7 @@ export default function FoodCalories() {
                 Consulte valores nutricionais de diversos alimentos
               </p>
             </div>
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 text-orange-600 hover:text-orange-800 transition-colors"
-            >
-              <FaArrowLeft className="mr-2" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboard />
           </div>
         </div>
 

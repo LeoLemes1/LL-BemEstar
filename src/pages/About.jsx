@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import BackToDashboard from '../components/BackToDashboard';
 import { 
   FaHeart, 
   FaFlask, 
@@ -130,15 +131,7 @@ export default function About() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
-          >
-            <FaArrowLeft />
-            Voltar
-          </button>
-        </div>
+        <BackToDashboard />
         
         {/* Header */}
         <div className="text-center mb-16">
