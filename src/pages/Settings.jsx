@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -14,15 +14,16 @@ import {
   FaCheck,
   FaTimes,
   FaToggleOn,
-  FaToggleOff,
-  FaArrowLeft
+  FaToggleOff
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-toastify';
+import { useToast } from '../context/ToastContext';
 import BackToDashboard from '../components/BackToDashboard';
+import { getUserSettings, saveUserSettings } from '../services/firestoreService';
 
 export default function Settings() {
-  const { user, updateUser, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [settings, setSettings] = useState({
     notifications: {
@@ -42,6 +43,23 @@ export default function Settings() {
     }
   });
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (user && user.id) {
+        try {
+          const result = await getUserSettings(user.id);
+          if (result.success) {
+            setSettings(result.data);
+          }
+        } catch (error) {
+          console.error('Error fetching settings:', error);
+        }
+      }
+    };
+
+    fetchSettings();
+  }, [user]);
+
   const handleSettingChange = (category, key, value) => {
     setSettings(prev => ({
       ...prev,
@@ -52,14 +70,16 @@ export default function Settings() {
     }));
   };
 
-  const handleSaveSettings = () => {
-    // Update user preferences
-    updateUser({});
-    
-    // Save to localStorage
-    localStorage.setItem('appSettings', JSON.stringify(settings));
-    
-    toast.success('Configurações salvas com sucesso!');
+  const handleSaveSettings = async () => {
+    if (user && user.id) {
+      try {
+        await saveUserSettings(user.id, settings);
+        toast.success('Configurações salvas com sucesso!');
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        toast.error('Erro ao salvar configurações');
+      }
+    }
   };
 
   const handleResetSettings = () => {
@@ -140,7 +160,7 @@ export default function Settings() {
     toast.success("Abra o diálogo e escolha 'Salvar como PDF'.");
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     const step1 = window.confirm('Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.');
     if (!step1) return;
     const challenge = window.prompt('Digite seu email para confirmar:');
@@ -149,27 +169,34 @@ export default function Settings() {
       toast.error('Email não confere. Conta não deletada.');
       return;
     }
-    // Backend virá depois. Por enquanto, limpamos sessão local e redirecionamos.
-    logout();
-    localStorage.removeItem('appSettings');
-    toast.success('Conta deletada com sucesso.');
-    window.location.href = '/loginRegistro';
+    
+    try {
+      await logout();
+      toast.success('Conta deletada com sucesso.');
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast.error('Erro ao deletar conta');
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <BackToDashboard />
-        
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
-            <FaCog className="mr-3" />
-            Configurações
-          </h1>
-          <p className="text-gray-600">
-            Personalize sua experiência na plataforma
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <FaCog className="mr-3" />
+                Configurações
+              </h1>
+              <p className="text-gray-600">
+                Personalize sua experiência na plataforma
+              </p>
+            </div>
+            <BackToDashboard />
+          </div>
         </div>
 
         <div className="space-y-8">

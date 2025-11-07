@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import BackToDashboard from '../components/BackToDashboard';
 import { motion } from 'framer-motion';
 import { 
@@ -13,13 +12,11 @@ import {
   FaBook,
   FaVideo,
   FaDownload,
-  FaExternalLinkAlt,
-  FaArrowLeft
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 export default function Help() {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedFaq, setExpandedFaq] = useState(null);
 
@@ -196,17 +193,20 @@ export default function Help() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <BackToDashboard />
-        
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-blue-800 mb-2 flex items-center">
-            <FaQuestionCircle className="mr-3" />
-            Ajuda
-          </h1>
-          <p className="text-gray-600">
-            Encontre respostas para suas dúvidas e aprenda a usar a plataforma
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-blue-800 mb-2 flex items-center">
+                <FaQuestionCircle className="mr-3" />
+                Ajuda
+              </h1>
+              <p className="text-gray-600">
+                Encontre respostas para suas dúvidas e aprenda a usar a plataforma
+              </p>
+            </div>
+            <BackToDashboard />
+          </div>
         </div>
 
         {/* Search */}

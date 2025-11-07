@@ -1,5 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
 import { 
   FaChartLine, 
   FaWeight, 
@@ -8,17 +20,97 @@ import {
   FaTrophy,
   FaArrowUp,
   FaArrowDown,
-  FaMinus,
-  FaArrowLeft
+  FaMinus
 } from 'react-icons/fa';
-import { mockProgress } from '../mock/userMock';
 import { useToast } from '../context/ToastContext';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import BackToDashboard from '../components/BackToDashboard';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
+import { getProgressHistory, addProgressEntry, deleteProgressEntry } from '../services/firestoreService';
+
+// Registrar componentes do Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+// Mock data inicial
+const mockProgress = {
+  weightHistory: [
+    { date: '2024-01-01', weight: 85 },
+    { date: '2024-01-15', weight: 83.5 },
+    { date: '2024-02-01', weight: 82 },
+    { date: '2024-02-15', weight: 81 },
+    { date: '2024-03-01', weight: 80 }
+  ],
+  calorieHistory: [
+    { date: '2024-01-01', calories: 2200 },
+    { date: '2024-01-15', calories: 2000 },
+    { date: '2024-02-01', calories: 1900 },
+    { date: '2024-02-15', calories: 1850 },
+    { date: '2024-03-01', calories: 1800 }
+  ]
+};
+
 export default function Progress() {
   const toast = useToast();
+  const { user, updateUser } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('3months');
-  const [progress] = useState(mockProgress);
+  const [progress, setProgress] = useState(mockProgress);
+  const [loading, setLoading] = useState(true);
+  const [showWeightModal, setShowWeightModal] = useState(false);
+  const [newWeight, setNewWeight] = useState('');
+  const [editingWeight, setEditingWeight] = useState(null);
+  const [savingWeight, setSavingWeight] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [weightToDelete, setWeightToDelete] = useState(null);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (user && user.id) {
+        try {
+          const result = await getProgressHistory(user.id);
+          if (result.success && result.data.length > 0) {
+            // Transform data from Firestore to match expected format
+            // IMPORTANTE: Ordenar por data CRESCENTE (mais antigo primeiro)
+            const weightHistory = result.data
+              .filter(entry => entry.weight)
+              .map(entry => ({
+                date: entry.date,
+                weight: entry.weight,
+                id: entry.id
+              }))
+              .sort((a, b) => new Date(a.date) - new Date(b.date)); // Mais antigo primeiro
+            
+            const calorieHistory = result.data
+              .filter(entry => entry.calories)
+              .map(entry => ({
+                date: entry.date,
+                calories: entry.calories
+              }))
+              .sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            setProgress({
+              weightHistory: weightHistory.length > 0 ? weightHistory : mockProgress.weightHistory,
+              calorieHistory: calorieHistory.length > 0 ? calorieHistory : mockProgress.calorieHistory
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching progress:', error);
+          toast.error('Erro ao carregar progresso');
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchProgress();
+  }, [user, toast]);
 
   const periods = [
     { value: '1month', label: '1 Mês' },
@@ -115,6 +207,7 @@ export default function Progress() {
     };
   };
 
+  // Recalcula sempre que progress mudar
   const progressData = calculateProgress();
 
   const getTrendIcon = (value) => {
@@ -129,6 +222,126 @@ export default function Progress() {
     return 'text-gray-600';
   };
 
+  const handleAddWeight = async () => {
+    if (!newWeight || isNaN(newWeight) || parseFloat(newWeight) <= 0) {
+      toast.error('Digite um peso válido');
+      return;
+    }
+
+    if (savingWeight) return; // Evita múltiplos cliques
+
+    try {
+      setSavingWeight(true);
+      const weightValue = parseFloat(newWeight);
+      
+      if (editingWeight) {
+        // Editar peso existente
+        await addProgressEntry(user.id, {
+          weight: weightValue,
+          date: editingWeight.date
+        });
+        toast.success('✅ Peso atualizado com sucesso!');
+      } else {
+        // Adicionar novo peso
+        await addProgressEntry(user.id, {
+          weight: weightValue,
+          date: new Date().toISOString().split('T')[0]
+        });
+        toast.success('✅ Peso registrado com sucesso!');
+      }
+      
+      // Atualiza peso atual do usuário se for o mais recente
+      await updateUser({ weight: weightValue });
+      
+      // Recarrega dados COMPLETAMENTE
+      const result = await getProgressHistory(user.id);
+      if (result.success) {
+        const weightHistory = result.data
+          .filter(entry => entry.weight)
+          .map(entry => ({
+            date: entry.date,
+            weight: entry.weight,
+            id: entry.id
+          }))
+          .sort((a, b) => new Date(a.date) - new Date(b.date)); // Mais antigo primeiro
+        
+        // Força atualização completa do estado
+        setProgress({
+          weightHistory: weightHistory.length > 0 ? weightHistory : mockProgress.weightHistory,
+          calorieHistory: progress.calorieHistory
+        });
+      }
+      
+      setShowWeightModal(false);
+      setNewWeight('');
+      setEditingWeight(null);
+    } catch (error) {
+      console.error('Error adding weight:', error);
+      toast.error('Erro ao registrar peso');
+    } finally {
+      setSavingWeight(false);
+    }
+  };
+
+  const handleDeleteWeight = (weightEntry) => {
+    setWeightToDelete(weightEntry);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteWeight = async () => {
+    if (!weightToDelete || !weightToDelete.id) {
+      toast.error('Erro: ID do peso não encontrado');
+      return;
+    }
+
+    try {
+      await deleteProgressEntry(user.id, weightToDelete.id);
+      
+      // Recarrega dados COMPLETAMENTE
+      const result = await getProgressHistory(user.id);
+      if (result.success) {
+        const weightHistory = result.data
+          .filter(entry => entry.weight)
+          .map(entry => ({
+            date: entry.date,
+            weight: entry.weight,
+            id: entry.id
+          }))
+          .sort((a, b) => new Date(a.date) - new Date(b.date)); // Mais antigo primeiro
+        
+        // Força atualização completa do estado
+        setProgress({
+          weightHistory: weightHistory.length > 0 ? weightHistory : mockProgress.weightHistory,
+          calorieHistory: progress.calorieHistory
+        });
+      }
+      
+      setShowDeleteModal(false);
+      setWeightToDelete(null);
+      toast.success('🗑️ Peso excluído com sucesso!');
+    } catch (error) {
+      console.error('Error deleting weight:', error);
+      toast.error('Erro ao excluir peso');
+    }
+  };
+
+  const handleEditWeight = (weightEntry) => {
+    setEditingWeight(weightEntry);
+    setNewWeight(weightEntry.weight.toString());
+    setShowWeightModal(true);
+  };
+
+  // Calcula dias de registro únicos
+  const uniqueDaysRegistered = new Set(progress.weightHistory.map(item => item.date)).size;
+  
+  // Calcula se tem 7+ dias de registro
+  const hasSevenDays = uniqueDaysRegistered >= 7;
+  
+  // Calcula perda total desde o início
+  const totalWeightLoss = user?.initialWeight && filteredWeightData.length > 0
+    ? user.initialWeight - filteredWeightData[filteredWeightData.length - 1].weight
+    : 0;
+
   const achievements = [
     {
       id: 1,
@@ -136,7 +349,7 @@ export default function Progress() {
       description: 'Completou 7 dias de acompanhamento',
       icon: FaTrophy,
       color: 'bg-yellow-100 text-yellow-800',
-      achieved: true
+      achieved: hasSevenDays
     },
     {
       id: 2,
@@ -144,23 +357,23 @@ export default function Progress() {
       description: 'Atingiu 5kg de perda de peso',
       icon: FaWeight,
       color: 'bg-green-100 text-green-800',
-      achieved: progressData?.weightChange <= -5
+      achieved: totalWeightLoss >= 5
     },
     {
       id: 3,
       title: 'Consistência',
-      description: '30 dias consecutivos de registro',
+      description: '30 dias de acompanhamento',
       icon: FaCalendar,
       color: 'bg-blue-100 text-blue-800',
-      achieved: filteredWeightData.length >= 30
+      achieved: uniqueDaysRegistered >= 30
     },
     {
       id: 4,
-      title: 'Controle Calórico',
-      description: 'Manteve déficit calórico por 2 semanas',
+      title: 'Mês Completo',
+      description: 'Registrou peso por 1 mês',
       icon: FaFire,
       color: 'bg-orange-100 text-orange-800',
-      achieved: false
+      achieved: uniqueDaysRegistered >= 30
     }
   ];
 
@@ -183,10 +396,30 @@ export default function Progress() {
           </div>
         </div>
 
+        {/* Registrar Peso */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <button
+            onClick={() => {
+              setEditingWeight(null);
+              setNewWeight('');
+              setShowWeightModal(true);
+            }}
+            className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 px-6 py-3 rounded-lg transition-all flex items-center gap-2 font-medium"
+          >
+            <FaWeight />
+            Registrar Peso
+          </button>
+        </motion.div>
+
         {/* Period Selector */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
           className="bg-white rounded-xl shadow-lg p-6 mb-8"
         >
           <div className="flex items-center justify-between mb-4">
@@ -210,11 +443,12 @@ export default function Progress() {
         </motion.div>
 
         {/* Progress Summary */}
-        {progressData && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {filteredWeightData.length >= 2 && progressData && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              key={`variation-${filteredWeightData.length}`}
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <div className="flex items-center justify-between">
@@ -235,26 +469,7 @@ export default function Progress() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Variação Calórica</p>
-                  <p className={`text-2xl font-bold ${getTrendColor(progressData.calorieChange)}`}>
-                    {progressData.calorieChange > 0 ? '+' : ''}{progressData.calorieChange.toFixed(0)} kcal
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {progressData.calorieChangePercent}%
-                  </p>
-                </div>
-                {getTrendIcon(progressData.calorieChange)}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              key={`current-${filteredWeightData[filteredWeightData.length - 1]?.weight}`}
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <div className="flex items-center justify-between">
@@ -272,24 +487,24 @@ export default function Progress() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.2 }}
+              key={`initial-${filteredWeightData[0]?.weight}`}
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Calorias Atuais</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {filteredCalorieData[filteredCalorieData.length - 1]?.calories || 0}
+                  <p className="text-sm text-gray-600">Peso Inicial</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {user?.initialWeight || filteredWeightData[0]?.weight || '--'}kg
                   </p>
-                  <p className="text-xs text-gray-500">kcal/dia</p>
+                  <p className="text-xs text-gray-500">primeiro registro</p>
                 </div>
-                <FaFire className="text-3xl text-orange-500" />
+                <FaWeight className="text-3xl text-blue-500" />
               </div>
             </motion.div>
           </div>
         )}
 
-        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Weight Chart */}
           <motion.div
@@ -298,26 +513,72 @@ export default function Progress() {
             className="bg-white rounded-xl shadow-lg p-6"
           >
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <FaWeight className="mr-2 text-emerald-500" />
-              Evolução do Peso
+              <FaChartLine className="mr-2 text-emerald-500" />
+              Gráfico de Evolução
             </h3>
-            <div className="h-64">
-              <Line data={weightChartData} options={chartOptions} />
-            </div>
+            {loading ? (
+              <div className="h-64 flex items-center justify-center">
+                <p className="text-gray-500">Carregando...</p>
+              </div>
+            ) : (
+              <div className="h-64">
+                <Line data={weightChartData} options={chartOptions} />
+              </div>
+            )}
           </motion.div>
 
-          {/* Calorie Chart */}
+          {/* Weight History List */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="bg-white rounded-xl shadow-lg p-6"
           >
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <FaFire className="mr-2 text-orange-500" />
-              Evolução de Calorias
+              <FaWeight className="mr-2 text-emerald-500" />
+              Pesos Registrados
             </h3>
-            <div className="h-64">
-              <Line data={calorieChartData} options={chartOptions} />
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {filteredWeightData.length > 0 ? (
+                filteredWeightData.slice().reverse().map((entry, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-bold">
+                        {entry.weight}kg
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {new Date(entry.date).toLocaleDateString('pt-BR', { 
+                          day: '2-digit', 
+                          month: 'short', 
+                          year: 'numeric' 
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditWeight(entry)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                      >
+                        ✏️ Editar
+                      </button>
+                      <button
+                        onClick={() => handleDeleteWeight(entry)}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                      >
+                        🗑️ Excluir
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <FaWeight className="text-4xl mx-auto mb-3 text-gray-300" />
+                  <p>Nenhum peso registrado ainda</p>
+                  <p className="text-sm">Clique em "Registrar Peso" para começar!</p>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -394,6 +655,97 @@ export default function Progress() {
           </div>
         </motion.div>
       </div>
+
+      {/* Modal de Excluir Peso */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setWeightToDelete(null);
+        }}
+        onConfirm={confirmDeleteWeight}
+        workoutName={weightToDelete ? `peso de ${weightToDelete.weight}kg (${new Date(weightToDelete.date).toLocaleDateString('pt-BR')})` : ''}
+      />
+
+      {/* Modal de Adicionar Peso */}
+      {showWeightModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          onClick={() => setShowWeightModal(false)}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 flex items-center">
+                <FaWeight className="mr-3 text-emerald-600" />
+                {editingWeight ? 'Editar Peso' : 'Registrar Peso'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowWeightModal(false);
+                  setEditingWeight(null);
+                  setNewWeight('');
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mb-6">
+              {!editingWeight && (
+                <p className="text-gray-600 text-sm mb-4">
+                  💡 <strong>Dica:</strong> Pese-se sempre no mesmo horário, preferencialmente pela manhã em jejum, para resultados mais precisos.
+                </p>
+              )}
+              {editingWeight && (
+                <p className="text-blue-600 text-sm mb-4">
+                  📝 Editando peso de <strong>{new Date(editingWeight.date).toLocaleDateString('pt-BR')}</strong>
+                </p>
+              )}
+              
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Peso (kg)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={newWeight}
+                onChange={(e) => setNewWeight(e.target.value)}
+                placeholder="Ex: 75.5"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-lg"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowWeightModal(false);
+                  setNewWeight('');
+                  setEditingWeight(null);
+                }}
+                className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-6 rounded-lg transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleAddWeight}
+                disabled={savingWeight}
+                className={`flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-6 rounded-lg transition-colors font-medium ${savingWeight ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {savingWeight ? '⏳ Salvando...' : editingWeight ? 'Atualizar' : 'Salvar'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

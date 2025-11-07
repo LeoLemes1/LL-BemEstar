@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import BackToDashboard from '../components/BackToDashboard';
 import { motion } from 'framer-motion';
-import { FaCalculator, FaWeight, FaRuler, FaBirthdayCake, FaHeart, FaArrowLeft } from 'react-icons/fa';
+import { FaCalculator, FaWeight, FaRuler, FaBirthdayCake, FaHeart } from 'react-icons/fa';
 import { useToast } from '../context/ToastContext';
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from '../utils';
 
 export default function Calculadora() {
   const toast = useToast();
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     weight: '',
     height: '',
@@ -66,16 +64,19 @@ export default function Calculadora() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <BackToDashboard />
-          
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-3">
-              <FaCalculator className="text-blue-600" />
-              Calculadora de Saúde
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Calcule seu IMC, metabolismo basal e necessidades calóricas
-            </p>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="text-left">
+                <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                  <FaCalculator className="text-blue-600 mr-3" />
+                  Calculadora de Saúde
+                </h1>
+                <p className="text-gray-600">
+                  Calcule seu IMC, metabolismo basal e necessidades calóricas
+                </p>
+              </div>
+              <BackToDashboard />
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">

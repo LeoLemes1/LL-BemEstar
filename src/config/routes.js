@@ -6,6 +6,7 @@ export const routes = {
   HELP: '/help',
   
   // Protected routes
+  ONBOARDING: '/setup',
   DASHBOARD: '/dashboard',
   AI_CHAT: '/ai-chat',
   MY_PLAN: '/my-plan',
@@ -25,6 +26,7 @@ export const publicRoutes = [
 ];
 
 export const protectedRoutes = [
+  routes.ONBOARDING,
   routes.DASHBOARD,
   routes.AI_CHAT,
   routes.MY_PLAN,

@@ -5,6 +5,7 @@ import { ToastProvider } from "./context/ToastContext";
 // Pages
 import InicioPagina from "./pages/InicioPagina";
 import LoginRegistro from "./pages/LoginRegistro";
+import OnboardingSetup from "./pages/OnboardingSetup";
 import Dashboard from "./pages/Dashboard";
 import AiChat from "./pages/AiChat";
 import MyPlan from "./pages/MyPlan";
@@ -46,6 +47,11 @@ function App() {
             <Route path="/help" element={<Help />} />
             
             {/* Protected Routes */}
+            <Route path="/setup" element={
+              <ProtectedRoute>
+                <OnboardingSetup />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

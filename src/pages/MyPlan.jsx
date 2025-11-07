@@ -14,11 +14,9 @@ import {
   FaArrowLeft
 } from 'react-icons/fa';
 import { mockNutritionPlan } from '../mock/userMock';
-// Chart removed to avoid hook conflicts
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
 import BackToDashboard from '../components/BackToDashboard';
-import { MacrosDonutChart } from '../components/BeautifulCharts';
 
 export default function MyPlan() {
   const toast = useToast();
@@ -127,34 +125,55 @@ export default function MyPlan() {
               <FaChartPie className="mr-2" />
               Macronutrientes
             </h3>
-            <div className="h-64 flex items-center justify-center">
-              <MacrosDonutChart
-                protein={nutritionPlan.macros.protein}
-                carbs={nutritionPlan.macros.carbs}
-                fat={nutritionPlan.macros.fat}
-              />
-            </div>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-blue-500 rounded mr-2"></div>
-                  <span className="text-sm">Proteínas</span>
+            
+            {/* Macros com barras de progresso */}
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <FaDrumstickBite className="text-blue-500 mr-2" />
+                    <span className="text-sm font-medium">Proteínas</span>
+                  </div>
+                  <span className="font-bold text-blue-600">{nutritionPlan.macros.protein}g</span>
                 </div>
-                <span className="font-bold">{nutritionPlan.macros.protein}g</span>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-blue-500 h-3 rounded-full transition-all"
+                    style={{ width: `${(nutritionPlan.macros.protein / (nutritionPlan.macros.protein + nutritionPlan.macros.carbs + nutritionPlan.macros.fat)) * 100}%` }}
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
-                  <span className="text-sm">Carboidratos</span>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <FaBreadSlice className="text-green-500 mr-2" />
+                    <span className="text-sm font-medium">Carboidratos</span>
+                  </div>
+                  <span className="font-bold text-green-600">{nutritionPlan.macros.carbs}g</span>
                 </div>
-                <span className="font-bold">{nutritionPlan.macros.carbs}g</span>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-green-500 h-3 rounded-full transition-all"
+                    style={{ width: `${(nutritionPlan.macros.carbs / (nutritionPlan.macros.protein + nutritionPlan.macros.carbs + nutritionPlan.macros.fat)) * 100}%` }}
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-orange-500 rounded mr-2"></div>
-                  <span className="text-sm">Gorduras</span>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <FaOilCan className="text-orange-500 mr-2" />
+                    <span className="text-sm font-medium">Gorduras</span>
+                  </div>
+                  <span className="font-bold text-orange-600">{nutritionPlan.macros.fat}g</span>
                 </div>
-                <span className="font-bold">{nutritionPlan.macros.fat}g</span>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-orange-500 h-3 rounded-full transition-all"
+                    style={{ width: `${(nutritionPlan.macros.fat / (nutritionPlan.macros.protein + nutritionPlan.macros.carbs + nutritionPlan.macros.fat)) * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
           </motion.div>

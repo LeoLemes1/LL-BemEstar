@@ -54,7 +54,7 @@ export default function Profile() {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate required fields
     if (!formData.name || !formData.email) {
       toast.error('Nome e email são obrigatórios');
@@ -66,10 +66,14 @@ export default function Profile() {
       return;
     }
 
-    // Update user data
-    updateUser(formData);
-    setIsEditing(false);
-    toast.success('Perfil atualizado com sucesso!');
+    // Update user data in Firestore
+    const result = await updateUser(formData);
+    if (result.success) {
+      setIsEditing(false);
+      toast.success('Perfil atualizado com sucesso!');
+    } else {
+      toast.error('Erro ao atualizar perfil');
+    }
   };
 
   const handleCancel = () => {

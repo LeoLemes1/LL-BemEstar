@@ -46,7 +46,7 @@ export default function LoginRegistro() {
         toast.success('Login realizado com sucesso!');
         navigate('/dashboard');
       } else {
-        toast.error('Credenciais inválidas');
+        toast.error(result.error || 'Credenciais inválidas');
       }
     } catch (error) {
       toast.error('Erro ao fazer login');
@@ -62,14 +62,19 @@ export default function LoginRegistro() {
       return;
     }
 
+    if (formData.password.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await register(formData.name, formData.email, formData.password);
       if (result.success) {
         toast.success('Conta criada com sucesso!');
-        navigate('/dashboard');
+        navigate('/setup');
       } else {
-        toast.error('Erro ao criar conta');
+        toast.error(result.error || 'Erro ao criar conta');
       }
     } catch (error) {
       toast.error('Erro ao criar conta');
